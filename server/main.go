@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	handlers "learn-tuxedolabs/internal/handler"
+	"learn-tuxedolabs/internal/middleware"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +25,15 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+
+	authRoutes := r.PathPrefix("/auth").Subrouter()
+	authRoutes.HandleFunc("/login", handlers.Login).Methods("POST")
+	authRoutes.HandleFunc("/register", handlers.Register).Methods("POST")
+
+	r.HandleFunc("/health", middleware.Auth(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})).Methods("GET")
 
 	logServiceStart(port)
 
