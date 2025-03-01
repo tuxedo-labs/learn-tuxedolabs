@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	entity "learn-tuxedolabs/internal/entity/model"
+	"learn-tuxedolabs/internal/model/entity"
 	"os"
 
 	"gorm.io/driver/mysql"

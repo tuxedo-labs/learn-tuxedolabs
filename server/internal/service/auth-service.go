@@ -11,7 +11,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
-	"gorm.io/gorm"
 )
 
 func ValidateLogin(loginRequest *request.LoginRequest) error {

@@ -15,13 +15,13 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("x-token")
 		if token == "" {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+      utils.RespondJSON(w, http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
 			return
 		}
 
 		claims, err := utils.DecodeToken(token)
 		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+      utils.RespondJSON(w, http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
 			return
 		}
 
