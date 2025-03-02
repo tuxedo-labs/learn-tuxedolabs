@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	handlers "learn-tuxedolabs/internal/handler"
+	"learn-tuxedolabs/internal/handler"
 	"learn-tuxedolabs/internal/middleware"
+	"learn-tuxedolabs/pkg/database"
 	"log"
 	"net/http"
 	"os"
@@ -24,11 +25,19 @@ func main() {
 		panic("PORT environment variable is not set")
 	}
 
+	err = database.DBConnect()
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+
 	r := mux.NewRouter()
 
 	authRoutes := r.PathPrefix("/auth").Subrouter()
-	authRoutes.HandleFunc("/login", handlers.Login).Methods("POST")
-	authRoutes.HandleFunc("/register", handlers.Register).Methods("POST")
+	authRoutes.HandleFunc("/login", handler.Login).Methods("POST")
+	authRoutes.HandleFunc("/register", handler.Register).Methods("POST")
+	authRoutes.HandleFunc("/{provider}/login", handler.OAuthLogin)
+	authRoutes.HandleFunc("/{provider}/callback", handler.OAuthCallback)
+	authRoutes.HandleFunc("/logout", handler.Logout)
 
 	r.HandleFunc("/health", middleware.Auth(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

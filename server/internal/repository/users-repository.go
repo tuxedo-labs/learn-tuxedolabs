@@ -39,3 +39,13 @@ func HashAndStoreUser(registerRequest *request.RegisterRequest) (string, error) 
 
 	return fmt.Sprintf("User %s registered successfully", newUser.Email), nil
 }
+
+func GetUserByEmail(email string) (*entity.Users, error) {
+	var user entity.Users
+	err := database.DB.First(&user, "email = ?", email).Error
+	return &user, err
+}
+
+func SaveUser(user *entity.Users) error {
+	return database.DB.Save(user).Error
+}
