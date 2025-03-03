@@ -84,7 +84,8 @@ func SaveOAuthUser(oauthUser goth.User) error {
 		Name:      firstName,
 		FirstName: firstName,
 		LastName:  &oauthUser.LastName,
-		Password:  "", // Password is not required for OAuth users
+		Password:  "",
+    Avatar:    oauthUser.AvatarURL,
 		Role:      "member",
 		Verify:    true,
 	}

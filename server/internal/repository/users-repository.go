@@ -28,6 +28,7 @@ func HashAndStoreUser(registerRequest *request.RegisterRequest) (string, error) 
 		FirstName: registerRequest.FirstName,
 		LastName:  &registerRequest.LastName,
 		Email:     registerRequest.Email,
+		Avatar:    "https://atg-prod-scalar.s3.amazonaws.com/studentpower/media/user%20avatar.png",
 		Password:  hashedPassword,
 		Role:      "member",
 		Verify:    true,
