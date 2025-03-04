@@ -28,6 +28,7 @@ func HashAndStoreUser(registerRequest *request.RegisterRequest) (string, error) 
 		FirstName: registerRequest.FirstName,
 		LastName:  &registerRequest.LastName,
 		Email:     registerRequest.Email,
+		Avatar:    "",
 		Password:  hashedPassword,
 		Role:      "member",
 		Verify:    true,

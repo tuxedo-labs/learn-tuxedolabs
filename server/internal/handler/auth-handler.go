@@ -9,12 +9,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
 	"github.com/gorilla/sessions"
 )
+
+var validate *validator.Validate
 
 func init() {
 	err := godotenv.Load()
@@ -27,6 +30,8 @@ func init() {
 	)
 
 	gothic.Store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+
+	validate = validator.New()
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -36,8 +41,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if errValidate := service.ValidateLogin(&loginRequest); errValidate != nil {
-		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{"message": "Validation failed", "error": errValidate.Error()})
+	if errValidate := validate.Struct(&loginRequest); errValidate != nil {
+		validationErrors := utils.ParseValidationErrors(errValidate)
+		utils.RespondJSON(w, http.StatusBadRequest, map[string]interface{}{"message": "Validation failed", "errors": validationErrors})
 		return
 	}
 
@@ -70,8 +76,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if errValidate := service.ValidateRegister(&registerRequest); errValidate != nil {
-		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{"message": "Validation failed", "error": errValidate.Error()})
+	if errValidate := validate.Struct(&registerRequest); errValidate != nil {
+		validationErrors := utils.ParseValidationErrors(errValidate)
+		utils.RespondJSON(w, http.StatusBadRequest, map[string]interface{}{"message": "Validation failed", "errors": validationErrors})
 		return
 	}
 

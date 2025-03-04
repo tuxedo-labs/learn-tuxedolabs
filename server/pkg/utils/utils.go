@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-playground/validator/v10"
 )
 
 var SecretKey string
@@ -59,6 +61,24 @@ func DecodeToken(tokenString string) (jwt.MapClaims, error) {
 	}
 
 	return nil, fmt.Errorf("invalid token")
+}
+
+func ParseValidationErrors(err error) map[string]string {
+	errors := make(map[string]string)
+	for _, err := range err.(validator.ValidationErrors) {
+		field := strings.ToLower(err.Field())
+		switch err.Tag() {
+		case "required":
+			errors[field] = fmt.Sprintf("%s is required", field)
+		case "email":
+			errors[field] = fmt.Sprintf("%s must be a valid email", field)
+		case "min":
+			errors[field] = fmt.Sprintf("%s must be at least %s characters long", field, err.Param())
+		default:
+			errors[field] = fmt.Sprintf("%s is invalid", field)
+		}
+	}
+	return errors
 }
 
 func init() {

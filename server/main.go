@@ -35,14 +35,13 @@ func main() {
 	authRoutes := r.PathPrefix("/auth").Subrouter()
 	authRoutes.HandleFunc("/login", handler.Login).Methods("POST")
 	authRoutes.HandleFunc("/register", handler.Register).Methods("POST")
-	authRoutes.HandleFunc("/{provider}/login", handler.OAuthLogin)
-	authRoutes.HandleFunc("/{provider}/callback", handler.OAuthCallback)
-	authRoutes.HandleFunc("/logout", handler.Logout)
+	authRoutes.HandleFunc("/{provider}/login", handler.OAuthLogin).Methods("GET")
+	authRoutes.HandleFunc("/{provider}/callback", handler.OAuthCallback).Methods("GET")
+	authRoutes.HandleFunc("/logout", handler.Logout).Methods("GET")
 
-	r.HandleFunc("/health", middleware.Auth(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})).Methods("GET")
+	userRoutes := r.PathPrefix("/user").Subrouter()
+	userRoutes.HandleFunc("/profile", middleware.Auth(handler.UserProfile)).Methods("GET")
+  userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PUT")
 
 	logServiceStart(port)
 
