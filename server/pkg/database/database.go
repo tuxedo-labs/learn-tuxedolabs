@@ -12,7 +12,7 @@ import (
 var DB *gorm.DB
 
 func DBConnect() error {
-	dsn := os.Getenv("MYSQL")
+	dsn := os.Getenv("DATABASE")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
