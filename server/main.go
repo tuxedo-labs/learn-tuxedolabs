@@ -41,7 +41,7 @@ func main() {
 
 	userRoutes := r.PathPrefix("/user").Subrouter()
 	userRoutes.HandleFunc("/profile", middleware.Auth(handler.UserProfile)).Methods("GET")
-  userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PUT")
+  // userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PUT")
 
 	logServiceStart(port)
 

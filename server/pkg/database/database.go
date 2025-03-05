@@ -12,7 +12,7 @@ import (
 var DB *gorm.DB
 
 func DBConnect() error {
-	dsn := os.Getenv("DATABASE")
+	dsn := os.Getenv("MYSQL")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -24,6 +24,5 @@ func DBConnect() error {
 
   // auto migrate
 	DB.AutoMigrate(entity.Users{}, entity.Contacts{})
-
 	return nil
 }

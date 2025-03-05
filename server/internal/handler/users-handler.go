@@ -44,6 +44,6 @@ func UserProfile(w http.ResponseWriter, r *http.Request) {
 	utils.RespondJSON(w, http.StatusOK, filter)
 }
 
-func UpdateProfile(w http.ResponseWriter, r *http.Request) {
-  return nil
-}
+// func UpdateProfile(w http.ResponseWriter, r *http.Request) {
+//   return nil
+// }
