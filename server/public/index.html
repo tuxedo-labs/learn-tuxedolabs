@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API Documentation</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+  <header class="bg-blue-600 text-white py-4">
+    <div class="container mx-auto px-4">
+      <h1 class="text-3xl font-bold">API Documentation</h1>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <section id="introduction" class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Introduction</h2>
+      <p>Welcome to the API documentation. This documentation provides endpoints and examples for interacting with our API.</p>
+    </section>
+
+    <section id="authentication" class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Authentication</h2>
+      <p>To access the API, you need to authenticate using the following endpoints.</p>
+      
+      <div class="bg-white shadow-md rounded p-6 mb-4">
+        <h3 class="text-xl font-semibold mb-2">Login</h3>
+        <p>Endpoint: <code class="bg-gray-200 px-2 py-1 rounded">POST /auth/login</code></p>
+        <p>Request Body:</p>
+        <pre class="bg-gray-200 p-4 rounded">
+{
+  "email": "user@example.com",
+  "password": "userpassword"
+}
+        </pre>
+        <p>Response:</p>
+        <pre class="bg-gray-200 p-4 rounded">
+{
+  "access_token": "your-access-token"
+}
+        </pre>
+      </div>
+
+      <div class="bg-white shadow-md rounded p-6 mb-4">
+        <h3 class="text-xl font-semibold mb-2">Register</h3>
+        <p>Endpoint: <code class="bg-gray-200 px-2 py-1 rounded">POST /auth/register</code></p>
+        <p>Request Body:</p>
+        <pre class="bg-gray-200 p-4 rounded">
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "user@example.com",
+  "password": "userpassword"
+}
+        </pre>
+        <p>Response:</p>
+        <pre class="bg-gray-200 p-4 rounded">
+{
+  "status": "success",
+  "user_id": 1,
+  "message": "Registration successful! Please check your email for the verification code"
+}
+        </pre>
+      </div>
+
+      <div class="bg-white shadow-md rounded p-6 mb-4">
+        <h3 class="text-xl font-semibold mb-2">OAuth Login</h3>
+        <p>Endpoint: <code class="bg-gray-200 px-2 py-1 rounded">GET /auth/{provider}/login</code></p>
+        <p>Available Providers:</p>
+        <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
+          <li>google</li>
+        </ul>
+        <p>Example:</p>
+        <pre class="bg-gray-200 p-4 rounded">
+GET /auth/google/login
+        </pre>
+      </div>
+    </section>
+
+    <section id="user" class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">User</h2>
+      <p>Endpoints related to user information.</p>
+      
+      <div class="bg-white shadow-md rounded p-6 mb-4">
+        <h3 class="text-xl font-semibold mb-2">Get User Profile</h3>
+        <p>Endpoint: <code class="bg-gray-200 px-2 py-1 rounded">GET /user/profile</code></p>
+        <p>Response:</p>
+        <pre class="bg-gray-200 p-4 rounded">
+{
+  "id": 1,
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "user@example.com",
+  "created_at": "2025-02-01T12:34:56Z",
+  "updated_at": "2025-02-01T12:34:56Z"
+}
+        </pre>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto px-4">
+      <p>&copy; 2025 Learn Tuxedo Labs. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

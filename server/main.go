@@ -31,6 +31,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./public/"))))
 
 	authRoutes := r.PathPrefix("/auth").Subrouter()
 	authRoutes.HandleFunc("/login", handler.Login).Methods("POST")
