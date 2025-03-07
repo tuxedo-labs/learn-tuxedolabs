@@ -31,7 +31,8 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./public/"))))
+
+  r.HandleFunc("/", serveIndex).Methods("GET")
 
 	authRoutes := r.PathPrefix("/auth").Subrouter()
 	authRoutes.HandleFunc("/login", handler.Login).Methods("POST")
@@ -53,4 +54,8 @@ func logServiceStart(port string) {
 	startTime := time.Now().Format(time.RFC1123)
 	message := fmt.Sprintf("🚀 Service running on http://localhost:%s | Started at: %s", port, startTime)
 	log.Println(message)
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./public/index.html")
 }
