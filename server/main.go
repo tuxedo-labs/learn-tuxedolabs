@@ -32,6 +32,8 @@ func main() {
 
 	r := mux.NewRouter()
 
+  r.HandleFunc("/", serveIndex).Methods("GET")
+
 	authRoutes := r.PathPrefix("/auth").Subrouter()
 	authRoutes.HandleFunc("/login", handler.Login).Methods("POST")
 	authRoutes.HandleFunc("/register", handler.Register).Methods("POST")
@@ -41,7 +43,7 @@ func main() {
 
 	userRoutes := r.PathPrefix("/user").Subrouter()
 	userRoutes.HandleFunc("/profile", middleware.Auth(handler.UserProfile)).Methods("GET")
-  // userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PUT")
+  userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PATCH")
 
 	logServiceStart(port)
 
@@ -52,4 +54,8 @@ func logServiceStart(port string) {
 	startTime := time.Now().Format(time.RFC1123)
 	message := fmt.Sprintf("🚀 Service running on http://localhost:%s | Started at: %s", port, startTime)
 	log.Println(message)
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./public/index.html")
 }

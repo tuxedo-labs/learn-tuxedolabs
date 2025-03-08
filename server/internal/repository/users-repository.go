@@ -50,3 +50,11 @@ func GetUserByEmail(email string) (*entity.Users, error) {
 func SaveUser(user *entity.Users) error {
 	return database.DB.Save(user).Error
 }
+
+func GetUserByID(userID uint) (*entity.Users, error) {
+	var user entity.Users
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
