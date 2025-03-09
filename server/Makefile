@@ -3,6 +3,13 @@ SRC_DIR=.
 
 default: build
 
+install:
+	@echo "Installing service on systemd"
+	@cp -f server.service /etc/systemd/system/
+	@systemctl enable server.service
+	@systemctl start server.service
+	@echo "Service installed"
+
 build:
 	@echo "Building the binary..."
 	@go build -o $(BINARY_NAME) $(SRC_DIR)
