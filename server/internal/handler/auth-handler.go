@@ -14,8 +14,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/github"
+	"github.com/markbates/goth/providers/google"
 )
 
 var validate *validator.Validate
@@ -102,6 +102,17 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func OAuthLogin(w http.ResponseWriter, r *http.Request) {
+	fromURL := r.URL.Query().Get("from")
+	if fromURL != "" {
+		session, _ := gothic.Store.Get(r, "redirect")
+		session.Values["from"] = fromURL
+		session.Save(r, w)
+	} else {
+		session, _ := gothic.Store.Get(r, "redirect")
+		delete(session.Values, "from")
+		session.Save(r, w)
+	}
+
 	gothic.BeginAuthHandler(w, r)
 }
 
@@ -128,7 +139,7 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 			utils.RespondJSON(w, http.StatusInternalServerError, map[string]string{"message": "Error generating access token"})
 			return
 		}
-		redirectWithToken(w, r, accessToken, "User already registered")
+		redirectOrRespond(w, r, accessToken, "User already registered")
 		return
 	}
 
@@ -150,7 +161,7 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirectWithToken(w, r, accessToken, "Successfully registered")
+	redirectOrRespond(w, r, accessToken, "Successfully registered")
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
@@ -162,10 +173,16 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "You have been logged out."})
 }
 
-func redirectWithToken(w http.ResponseWriter, r *http.Request, token string, message string) {
-	formURL := r.URL.Query().Get("form")
-	if formURL == "" {
-		formURL = "/"
+func redirectOrRespond(w http.ResponseWriter, r *http.Request, token string, message string) {
+	session, _ := gothic.Store.Get(r, "redirect")
+	fromURL, ok := session.Values["from"].(string)
+	if !ok || fromURL == "" {
+		utils.RespondJSON(w, http.StatusOK, map[string]interface{}{
+			"access_token": token,
+			"message":      message,
+		})
+		return
 	}
-	http.Redirect(w, r, formURL+"?accessToken="+token+"&message="+message, http.StatusSeeOther)
+
+	http.Redirect(w, r, fromURL+"?accessToken="+token+"&message="+message, http.StatusSeeOther)
 }
