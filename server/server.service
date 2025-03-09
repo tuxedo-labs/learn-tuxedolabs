@@ -1,0 +1,12 @@
+[Unit]
+Description=Server service app.
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+WorkingDirectory=/root/learn-tuxedolabs
+ExecStart=./learn-tuxedolabs
+
+[Install]
+WantedBy=multi-user.target

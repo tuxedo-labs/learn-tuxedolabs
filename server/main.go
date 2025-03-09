@@ -37,6 +37,7 @@ func main() {
 	authRoutes.HandleFunc("/register", handler.Register).Methods("POST")
 	authRoutes.HandleFunc("/{provider}/login", handler.OAuthLogin).Methods("GET")
 	authRoutes.HandleFunc("/{provider}/callback", handler.OAuthCallback).Methods("GET")
+  authRoutes.HandleFunc("/forget-password", handler.ForgetPassword).Methods("POST")
 	authRoutes.HandleFunc("/logout", handler.Logout).Methods("GET")
 
 	userRoutes := r.PathPrefix("/user").Subrouter()

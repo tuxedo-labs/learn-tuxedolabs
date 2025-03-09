@@ -164,6 +164,28 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	redirectOrRespond(w, r, accessToken, "Successfully registered")
 }
 
+func ForgetPassword(w http.ResponseWriter, r *http.Request) {
+	var forgetPasswordRequest request.ForgetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&forgetPasswordRequest); err != nil {
+		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{"message": "Invalid request payload"})
+		return
+	}
+
+	if errValidate := validate.Struct(&forgetPasswordRequest); errValidate != nil {
+		validationErrors := utils.ParseValidationErrors(errValidate)
+		utils.RespondJSON(w, http.StatusBadRequest, map[string]interface{}{"message": "Validation failed", "errors": validationErrors})
+		return
+	}
+
+	existingUser, err := service.GetUserByEmail(forgetPasswordRequest.Email)
+	if err != nil || existingUser == nil {
+		utils.RespondJSON(w, http.StatusNotFound, map[string]string{"message": "User not found"})
+		return
+	}
+
+	utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "Password reset instructions sent to your email."})
+}
+
 func Logout(w http.ResponseWriter, r *http.Request) {
 	err := gothic.Logout(w, r)
 	if err != nil {

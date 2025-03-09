@@ -7,6 +7,7 @@ import (
 	"learn-tuxedolabs/internal/model/entity"
 	"learn-tuxedolabs/internal/model/request"
 	"learn-tuxedolabs/internal/repository"
+	"learn-tuxedolabs/pkg/config"
 	"learn-tuxedolabs/pkg/utils"
 	"net/http"
 	"strings"
@@ -97,6 +98,11 @@ func SaveOAuthUser(oauthUser goth.User) error {
 	}
 
 	return repository.SaveUser(&user)
+}
+
+func SendForgetPasswordEmail(email string) {
+  // sementara stop
+  return nil
 }
 
 func FetchGitHubEmail(accessToken string) (string, error) {
