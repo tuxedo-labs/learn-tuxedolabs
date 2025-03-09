@@ -1,12 +1,14 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"learn-tuxedolabs/internal/middleware"
 	"learn-tuxedolabs/internal/model/entity"
 	"learn-tuxedolabs/internal/model/request"
 	"learn-tuxedolabs/internal/repository"
 	"learn-tuxedolabs/pkg/utils"
+	"net/http"
 	"strings"
 	"time"
 
@@ -96,4 +98,34 @@ func SaveOAuthUser(oauthUser goth.User) error {
 	}
 
 	return repository.SaveUser(&user)
+}
+
+func FetchGitHubEmail(accessToken string) (string, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var emails []map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&emails); err != nil {
+		return "", fmt.Errorf("failed to decode user emails: %w", err)
+	}
+
+	for _, email := range emails {
+		if email["primary"].(bool) && email["verified"].(bool) {
+			return email["email"].(string), nil
+		}
+	}
+
+	return "", fmt.Errorf("no primary verified email found")
 }

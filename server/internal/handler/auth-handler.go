@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"learn-tuxedolabs/internal/model/request"
 	"learn-tuxedolabs/internal/service"
 	"learn-tuxedolabs/pkg/utils"
@@ -10,11 +11,12 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
-	"github.com/gorilla/sessions"
+	"github.com/markbates/goth/providers/github"
 )
 
 var validate *validator.Validate
@@ -27,6 +29,7 @@ func init() {
 
 	goth.UseProviders(
 		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), os.Getenv("GOOGLE_CALLBACK_URL")),
+    github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), os.Getenv("GITHUB_CALLBACK_URL"), "user:email"),
 	)
 
 	gothic.Store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
@@ -110,6 +113,22 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// userData, err := json.Marshal(user)
+	// if err == nil {
+	// 	fmt.Println(string(userData))
+	// } else {
+	// 	fmt.Println("Error marshaling user data:", err)
+	// }
+
+	if user.Provider == "github" && user.Email == "" {
+		email, err := service.FetchGitHubEmail(user.AccessToken)
+		if err == nil {
+			user.Email = email
+		} else {
+			fmt.Println("Error fetching user email:", err)
+		}
+	}
+
 	existingUser, err := service.GetUserByEmail(user.Email)
 	if err == nil && existingUser != nil {
 		accessToken, err := service.GenerateAccessToken(*existingUser)
@@ -118,7 +137,7 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		utils.RespondJSON(w, http.StatusOK, map[string]interface{}{
-			"message":      "user already register",
+			"message":      "User already registered",
 			"access_token": accessToken,
 		})
 		return
@@ -143,7 +162,7 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.RespondJSON(w, http.StatusOK, map[string]interface{}{
-		"message":      "success register",
+		"message":      "Successfully registered",
 		"access_token": accessToken,
 	})
 }
