@@ -17,13 +17,17 @@ import (
 	"github.com/markbates/goth"
 )
 
+var validate *validator.Validate
+
+func init() {
+	validate = validator.New()
+}
+
 func ValidateLogin(loginRequest *request.LoginRequest) error {
-	validate := validator.New()
 	return validate.Struct(loginRequest)
 }
 
 func ValidateRegister(registerRequest *request.RegisterRequest) error {
-	validate := validator.New()
 	return validate.Struct(registerRequest)
 }
 
@@ -50,12 +54,7 @@ func GenerateAccessToken(user entity.Users) (string, error) {
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
 	}
 
-	token, err := utils.GenerateToken(&claims)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
+	return utils.GenerateToken(&claims)
 }
 
 func RegisterUser(registerRequest *request.RegisterRequest) (*entity.Users, error) {
@@ -87,7 +86,7 @@ func SaveOAuthUser(oauthUser goth.User) error {
 		FirstName: firstName,
 		LastName:  &oauthUser.LastName,
 		Password:  "",
-    Avatar:    oauthUser.AvatarURL,
+		Avatar:    oauthUser.AvatarURL,
 		Role:      "member",
 		Verify:    true,
 	}
