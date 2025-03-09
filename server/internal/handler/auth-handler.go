@@ -10,11 +10,12 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
-	"github.com/gorilla/sessions"
+	"github.com/markbates/goth/providers/github"
 )
 
 var validate *validator.Validate
@@ -26,7 +27,8 @@ func init() {
 	}
 
 	goth.UseProviders(
-		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), os.Getenv("GOOGLE_CALLBACK_URL")),
+		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), os.Getenv("GOOGLE_CALLBACK_URL"), "openid", "profile", "email"),
+		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), os.Getenv("GITHUB_CALLBACK_URL"), "user:email"),
 	)
 
 	gothic.Store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
@@ -106,8 +108,17 @@ func OAuthLogin(w http.ResponseWriter, r *http.Request) {
 func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		utils.RespondJSON(w, http.StatusTemporaryRedirect, map[string]string{"message": "Error completing user authentication"})
 		return
+	}
+
+	if user.Provider == "github" && user.Email == "" {
+		email, err := service.FetchGitHubEmail(user.AccessToken)
+		if err != nil {
+			utils.RespondJSON(w, http.StatusInternalServerError, map[string]string{"message": "Error fetching user email"})
+			return
+		}
+		user.Email = email
 	}
 
 	existingUser, err := service.GetUserByEmail(user.Email)
@@ -117,10 +128,7 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 			utils.RespondJSON(w, http.StatusInternalServerError, map[string]string{"message": "Error generating access token"})
 			return
 		}
-		utils.RespondJSON(w, http.StatusOK, map[string]interface{}{
-			"message":      "user already register",
-			"access_token": accessToken,
-		})
+		redirectWithToken(w, r, accessToken, "User already registered")
 		return
 	}
 
@@ -142,10 +150,7 @@ func OAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.RespondJSON(w, http.StatusOK, map[string]interface{}{
-		"message":      "success register",
-		"access_token": accessToken,
-	})
+	redirectWithToken(w, r, accessToken, "Successfully registered")
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
@@ -155,4 +160,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "You have been logged out."})
+}
+
+func redirectWithToken(w http.ResponseWriter, r *http.Request, token string, message string) {
+	formURL := r.URL.Query().Get("form")
+	if formURL == "" {
+		formURL = "/"
+	}
+	http.Redirect(w, r, formURL+"?accessToken="+token+"&message="+message, http.StatusSeeOther)
 }
