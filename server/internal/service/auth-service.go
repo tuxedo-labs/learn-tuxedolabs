@@ -106,7 +106,7 @@ func SendForgetPasswordEmail(user *entity.Users) error {
 		return err
 	}
 
-	resetURL := fmt.Sprintf("https://yourapp.com/reset-password?token=%s", token)
+	resetURL := fmt.Sprintf("http://api.learn.tuxedolabs.xyz/auth/reset-password?token=%s", token)
 	emailBody := fmt.Sprintf("Hi %s,\n\nPlease click the following link to reset your password: %s", user.Name, resetURL)
 
 	smtpConfig, err := config.LoadSMTPConfig()

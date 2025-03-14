@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
