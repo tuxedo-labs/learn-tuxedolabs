@@ -23,6 +23,6 @@ func DBConnect() error {
 	DB = db
 
   // auto migrate
-	DB.AutoMigrate(entity.Users{}, entity.Contacts{})
+	DB.AutoMigrate(entity.Users{}, entity.Contacts{}, entity.ResetPasswordToken{})
 	return nil
 }

@@ -58,3 +58,7 @@ func GetUserByID(userID uint) (*entity.Users, error) {
 	}
 	return &user, nil
 }
+
+func SaveResetPasswordToken(token *entity.ResetPasswordToken) error {
+	return database.DB.Create(token).Error
+}

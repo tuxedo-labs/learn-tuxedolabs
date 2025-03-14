@@ -100,9 +100,41 @@ func SaveOAuthUser(oauthUser goth.User) error {
 	return repository.SaveUser(&user)
 }
 
-func SendForgetPasswordEmail(email string) {
-  // sementara stop
-  return nil
+func SendForgetPasswordEmail(user *entity.Users) error {
+	token, err := GenerateResetPasswordToken(user)
+	if err != nil {
+		return err
+	}
+
+	resetURL := fmt.Sprintf("https://yourapp.com/reset-password?token=%s", token)
+	emailBody := fmt.Sprintf("Hi %s,\n\nPlease click the following link to reset your password: %s", user.Name, resetURL)
+
+	smtpConfig, err := config.LoadSMTPConfig()
+	if err != nil {
+		return err
+	}
+
+	return smtpConfig.SendEmail(smtpConfig.SenderEmail, []string{user.Email}, nil, "Password Reset", emailBody)
+}
+
+func GenerateResetPasswordToken(user *entity.Users) (string, error) {
+	token, err := utils.GenerateRandomString(32)
+	if err != nil {
+		return "", err
+	}
+
+	resetToken := entity.ResetPasswordToken{
+		UserID:    user.ID,
+		Token:     token,
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(1 * time.Hour), 
+  }
+
+	if err := repository.SaveResetPasswordToken(&resetToken); err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func FetchGitHubEmail(accessToken string) (string, error) {

@@ -6,3 +6,7 @@ type Contacts struct {
 	UserID uint   `json:"user_id" gorm:"unique"`
 	User   Users  `gorm:"foreignKey:UserID"`
 }
+
+func (Contacts) TableName() string {
+  return "contacts"
+}
