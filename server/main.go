@@ -5,6 +5,7 @@ import (
 	"learn-tuxedolabs/internal/handler"
 	"learn-tuxedolabs/internal/middleware"
 	"learn-tuxedolabs/pkg/database"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
@@ -44,9 +45,16 @@ func main() {
 	userRoutes.HandleFunc("/profile", middleware.Auth(handler.UserProfile)).Methods("GET")
 	userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PATCH")
 
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"https://tuxedolabs.xyz"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(r)
+
 	logServiceStart(port)
 
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
 func logServiceStart(port string) {
