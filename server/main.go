@@ -5,7 +5,7 @@ import (
 	"learn-tuxedolabs/internal/handler"
 	"learn-tuxedolabs/internal/middleware"
 	"learn-tuxedolabs/pkg/database"
-	"learn-tuxedolabs/pkg/helper"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
@@ -38,16 +38,23 @@ func main() {
 	authRoutes.HandleFunc("/register", handler.Register).Methods("POST")
 	authRoutes.HandleFunc("/{provider}/login", handler.OAuthLogin).Methods("GET")
 	authRoutes.HandleFunc("/{provider}/callback", handler.OAuthCallback).Methods("GET")
-  authRoutes.HandleFunc("/forget-password", handler.ForgetPassword).Methods("POST")
+	authRoutes.HandleFunc("/forget-password", handler.ForgetPassword).Methods("POST")
 	authRoutes.HandleFunc("/logout", handler.Logout).Methods("GET")
 
 	userRoutes := r.PathPrefix("/user").Subrouter()
 	userRoutes.HandleFunc("/profile", middleware.Auth(handler.UserProfile)).Methods("GET")
-  userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PATCH")
+	userRoutes.HandleFunc("/profile", middleware.Auth(handler.UpdateProfile)).Methods("PATCH")
+
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"https://tuxedolabs.xyz"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(r)
 
 	logServiceStart(port)
 
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
 func logServiceStart(port string) {

@@ -183,6 +183,11 @@ func ForgetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := service.SendForgetPasswordEmail(existingUser); err != nil {
+		utils.RespondJSON(w, http.StatusInternalServerError, map[string]string{"message": "Failed to send password reset email"})
+		return
+	}
+
 	utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "Password reset instructions sent to your email."})
 }
 

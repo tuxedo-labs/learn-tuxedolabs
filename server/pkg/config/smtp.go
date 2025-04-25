@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"net/smtp"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
 
 const (
-	CONFIG_SMTP_HOST        = "SMTP_HOST"
-	CONFIG_SMTP_PORT        = "SMTP_PORT"
-	CONFIG_SMTP_USERNAME    = "SMTP_USERNAME"
-	CONFIG_SMTP_PASSWORD    = "SMTP_PASSWORD"
-	CONFIG_SMTP_SENDER_NAME = "SMTP_SENDER_NAME"
-	CONFIG_SMTP_SENDER_EMAIL = "SMTP_SENDER_EMAIL"
+	CONFIG_SMTP_HOST        = "MAIL_HOST"
+	CONFIG_SMTP_PORT        = "MAIL_PORT"
+	CONFIG_SMTP_USERNAME    = "MAIL_USERNAME"
+	CONFIG_SMTP_PASSWORD    = "MAIL_PASSWORD"
+	CONFIG_SMTP_SENDER_NAME = "MAIL_FROM_NAME"
+	CONFIG_SMTP_SENDER_EMAIL = "MAIL_FROM_ADDRESS"
 )
 
 type SMTPConfig struct {
@@ -50,7 +51,9 @@ func (config *SMTPConfig) SendEmail(from string, to []string, cc []string, subje
 	header := make(map[string]string)
 	header["From"] = fmt.Sprintf("%s <%s>", config.SenderName, config.SenderEmail)
 	header["To"] = joinAddresses(to)
-	header["Cc"] = joinAddresses(cc)
+	if len(cc) > 0 {
+		header["Cc"] = joinAddresses(cc)
+	}
 	header["Subject"] = subject
 	header["MIME-Version"] = "1.0"
 	header["Content-Type"] = "text/html; charset=\"utf-8\""
@@ -70,5 +73,5 @@ func (config *SMTPConfig) SendEmail(from string, to []string, cc []string, subje
 }
 
 func joinAddresses(addresses []string) string {
-	return fmt.Sprintf("%s", addresses)
+	return strings.Join(addresses, ", ")
 }
